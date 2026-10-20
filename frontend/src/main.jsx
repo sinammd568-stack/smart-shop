@@ -7,21 +7,24 @@ import ErrorBoundary from './components/ErrorBoundary.jsx'
 import { CartProvider } from './context/CartContext.jsx'
 import { ToastProvider } from './context/ToastContext.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
+import { AuthProvider } from './context/AuthContext.jsx' // 👈 اضافه شد
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <ThemeProvider> 
-        <MotionConfig reducedMotion="user">
-          <BrowserRouter>
-            <ToastProvider>
-              <CartProvider>
-                <App />
-              </CartProvider>
-            </ToastProvider>
-          </BrowserRouter>
-        </MotionConfig>
+      <ThemeProvider>
+        <AuthProvider> 
+          <MotionConfig reducedMotion="user">
+            <BrowserRouter>
+              <ToastProvider>
+                <CartProvider>
+                  <App />
+                </CartProvider>
+              </ToastProvider>
+            </BrowserRouter>
+          </MotionConfig>
+        </AuthProvider>
       </ThemeProvider>
     </ErrorBoundary>
   </React.StrictMode>
