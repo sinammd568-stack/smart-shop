@@ -6,8 +6,8 @@
   html {
     scroll-behavior: smooth;
   }
-  body {
-    @apply bg-slate-50 font-sans text-slate-900 antialiased transition-colors duration-300 dark:bg-base dark:text-slate-100;
+   body {
+    @apply bg-slate-50 font-sans text-slate-900 antialiased transition-colors duration-300 dark:bg-[#050814] dark:text-slate-100;
     min-height: 100vh;
   }
   ::selection {
