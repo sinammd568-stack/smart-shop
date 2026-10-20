@@ -40,14 +40,14 @@ function MiniProduct({ id }) {
 
   return (
     <div className="glass flex items-center gap-3 rounded-xl p-2.5">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand/25 text-brand-light">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand/15 text-brand-dark dark:bg-brand/25 dark:text-brand-light">
         <Icon size={20} />
       </span>
       <div className="min-w-0 flex-1">
-        <Link to={`/product/${product.id}`} className="block truncate text-xs font-bold hover:text-brand-light">
+        <Link to={`/product/${product.id}`} className="block truncate text-xs font-bold hover:text-brand-dark dark:hover:text-brand-light text-slate-800 dark:text-slate-200">
           {product.name}
         </Link>
-        <p className="mt-0.5 text-[11px] text-slate-400">{fmt(product.price)} تومان</p>
+        <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">{fmt(product.price)} تومان</p>
       </div>
       <button
         onClick={() => {
@@ -65,14 +65,14 @@ function MiniProduct({ id }) {
 
 export default function AIChat() {
   const [open, setOpen] = useState(false)
-  const [activated, setActivated] = useState(false) // بعد از اولین باز شدن، اتصال زنده می‌ماند
+  const [activated, setActivated] = useState(false)
   const [messages, setMessages] = useState([WELCOME])
   const [input, setInput] = useState('')
-  const [status, setStatus] = useState('closed') // connecting | open | closed
+  const [status, setStatus] = useState('closed')
   const [gaveUp, setGaveUp] = useState(false)
   const [retryTick, setRetryTick] = useState(0)
-  const [typing, setTyping] = useState(false) // قبل از رسیدن اولین بخش پاسخ
-  const [busy, setBusy] = useState(false) // تا پایان پاسخ
+  const [typing, setTyping] = useState(false)
+  const [busy, setBusy] = useState(false)
   const [unread, setUnread] = useState(0)
 
   const wsRef = useRef(null)
@@ -87,7 +87,6 @@ export default function AIChat() {
     setActivated(true)
   }, [])
 
-  // باز کردن چت از بیرون (دکمه‌ها) با امکان پر کردن متن اولیه
   useEffect(() => {
     const handler = (e) => {
       show()
@@ -103,7 +102,6 @@ export default function AIChat() {
     if (open) setUnread(0)
   }, [open])
 
-  // بستن با Escape
   useEffect(() => {
     if (!open) return undefined
     const onKey = (e) => {
@@ -116,7 +114,6 @@ export default function AIChat() {
     return () => document.removeEventListener('keydown', onKey)
   }, [open])
 
-  // اتصال WebSocket (با تلاش مجدد نمایی). بعد از اولین باز شدن زنده می‌ماند تا زمینه‌ی گفتگو حفظ شود.
   useEffect(() => {
     if (!activated) return undefined
 
@@ -206,7 +203,6 @@ export default function AIChat() {
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages, typing, open])
 
-  // فوکوس خودکار روی ورودی (فقط دسکتاپ، تا کیبورد موبایل ناخواسته باز نشود)
   useEffect(() => {
     if (open && status === 'open' && window.matchMedia('(min-width: 640px)').matches) {
       inputRef.current?.focus()
@@ -237,7 +233,7 @@ export default function AIChat() {
   }
 
   const statusLabel = status === 'open' ? 'آنلاین' : status === 'connecting' ? 'در حال اتصال…' : 'قطع شده'
-  const statusColor = status === 'open' ? 'bg-emerald-400' : status === 'connecting' ? 'bg-amber-400' : 'bg-red-400'
+  const statusColor = status === 'open' ? 'bg-emerald-500' : status === 'connecting' ? 'bg-amber-500' : 'bg-red-500'
 
   return (
     <>
@@ -250,17 +246,17 @@ export default function AIChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
             transition={{ duration: 0.2 }}
-            className="glass-strong fixed bottom-24 right-4 z-50 flex h-[34rem] max-h-[calc(100dvh-7rem)] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-3xl sm:right-6"
+            className="glass-strong fixed bottom-24 right-4 z-50 flex h-[34rem] max-h-[calc(100dvh-7rem)] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-3xl sm:right-6 border border-slate-200 dark:border-white/10 shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-white/10 bg-brand/20 px-4 py-3">
+            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-brand/20 px-4 py-3">
               <div className="flex items-center gap-3">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-dark">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-dark text-white shadow-md">
                   <Sparkles size={18} />
                 </span>
                 <div>
-                  <h2 className="text-sm font-extrabold">دستیار خرید هوشمند</h2>
-                  <p className="flex items-center gap-1.5 text-[11px] text-slate-300">
+                  <h2 className="text-sm font-extrabold text-slate-800 dark:text-white">دستیار خرید هوشمند</h2>
+                  <p className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-300">
                     <span className={`h-2 w-2 rounded-full ${statusColor}`} aria-hidden="true" />
                     {statusLabel}
                   </p>
@@ -270,13 +266,17 @@ export default function AIChat() {
                 <button
                   onClick={clearChat}
                   disabled={busy || messages.length === 1}
-                  className="rounded-lg p-1.5 hover:bg-white/10 disabled:opacity-40"
+                  className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white disabled:opacity-40 transition-colors"
                   aria-label="پاک کردن گفتگو"
                   title="پاک کردن گفتگو"
                 >
                   <Trash2 size={16} />
                 </button>
-                <button onClick={() => setOpen(false)} className="rounded-lg p-1.5 hover:bg-white/10" aria-label="بستن چت">
+                <button 
+                  onClick={() => setOpen(false)} 
+                  className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white transition-colors" 
+                  aria-label="بستن چت"
+                >
                   <X size={18} />
                 </button>
               </div>
@@ -294,7 +294,11 @@ export default function AIChat() {
                 <div key={m.id} className={`flex gap-2 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
                   <span
                     aria-hidden="true"
-                    className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${m.role === 'user' ? 'bg-white/15' : 'bg-brand/40'}`}
+                    className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${
+                      m.role === 'user' 
+                        ? 'bg-slate-200 text-slate-600 dark:bg-white/15 dark:text-white' 
+                        : 'bg-brand/20 text-brand-dark dark:bg-brand/40 dark:text-brand-light'
+                    }`}
                   >
                     {m.role === 'user' ? <User size={14} /> : <Bot size={14} />}
                   </span>
@@ -302,10 +306,10 @@ export default function AIChat() {
                     <div
                       className={`whitespace-pre-wrap break-words rounded-2xl px-3.5 py-2 text-sm leading-7 ${
                         m.role === 'user'
-                          ? 'rounded-tl-sm bg-brand-dark text-white'
+                          ? 'rounded-tl-sm bg-brand-dark text-white shadow-sm'
                           : m.isError
-                          ? 'glass rounded-tr-sm border-red-400/40 text-red-200'
-                          : 'glass rounded-tr-sm'
+                          ? 'rounded-tr-sm border border-red-400/30 bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-200'
+                          : 'glass rounded-tr-sm text-slate-800 dark:text-slate-100'
                       }`}
                     >
                       {m.text}
@@ -318,7 +322,7 @@ export default function AIChat() {
               ))}
 
               {typing && (
-                <div className="flex items-center gap-2 text-xs text-slate-400">
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                   <Loader2 size={14} className="animate-spin motion-reduce:animate-none" /> در حال نوشتن…
                 </div>
               )}
@@ -330,7 +334,7 @@ export default function AIChat() {
                       key={s}
                       onClick={() => send(s)}
                       disabled={status !== 'open'}
-                      className="glass rounded-full px-3 py-1.5 text-xs text-brand-light transition hover:bg-white/10 disabled:opacity-40"
+                      className="glass rounded-full px-3 py-1.5 text-xs text-brand-dark transition hover:bg-slate-200 dark:text-brand-light dark:hover:bg-white/10 disabled:opacity-40"
                     >
                       {s}
                     </button>
@@ -342,7 +346,7 @@ export default function AIChat() {
 
             {/* Connection banner */}
             {gaveUp && (
-              <div className="flex items-center justify-between gap-2 border-t border-red-400/30 bg-red-500/10 px-4 py-2 text-xs text-red-200">
+              <div className="flex items-center justify-between gap-2 border-t border-red-400/30 bg-red-50 dark:bg-red-500/10 px-4 py-2 text-xs text-red-600 dark:text-red-200">
                 <span className="flex items-center gap-2">
                   <WifiOff size={14} /> اتصال برقرار نشد.
                 </span>
@@ -353,7 +357,7 @@ export default function AIChat() {
             )}
 
             {/* Input */}
-            <form onSubmit={onSubmit} className="border-t border-white/10 p-3">
+            <form onSubmit={onSubmit} className="border-t border-slate-200 dark:border-white/10 p-3 bg-white/50 dark:bg-transparent">
               <div className="flex items-center gap-2">
                 <input
                   ref={inputRef}
@@ -364,7 +368,7 @@ export default function AIChat() {
                   autoComplete="off"
                   aria-label="پیام شما"
                   placeholder={status === 'open' ? 'پیامت را بنویس…' : 'در حال برقراری اتصال…'}
-                  className="glass min-w-0 flex-1 rounded-xl px-3.5 py-2.5 text-base outline-none placeholder:text-slate-400 focus:border-brand disabled:opacity-60 sm:text-sm"
+                  className="glass min-w-0 flex-1 rounded-xl px-3.5 py-2.5 text-base outline-none placeholder:text-slate-400 focus:border-brand dark:text-white sm:text-sm"
                 />
                 <button
                   type="submit"
@@ -385,13 +389,16 @@ export default function AIChat() {
         )}
       </AnimatePresence>
 
-      {/* FAB */}
+      {/* FAB - دکمه شناور قابل جابجایی */}
       <motion.button
         ref={fabRef}
+        drag
+        dragMomentum={false}
+        dragElastic={0.1}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.93 }}
         onClick={() => (open ? setOpen(false) : show())}
-        className="fixed bottom-6 right-4 z-50 grid h-14 w-14 place-items-center rounded-full bg-brand-dark text-white shadow-xl shadow-brand/50 sm:right-6"
+        className="fixed bottom-6 right-4 z-50 grid h-14 w-14 cursor-grab active:cursor-grabbing place-items-center rounded-full bg-brand-dark text-white shadow-xl shadow-brand/30 dark:shadow-brand/50 sm:right-6"
         aria-label={open ? 'بستن دستیار خرید' : unread > 0 ? `باز کردن دستیار خرید، ${fmt(unread)} پیام جدید` : 'باز کردن دستیار خرید'}
         aria-expanded={open}
       >
