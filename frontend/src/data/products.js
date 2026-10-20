@@ -12,7 +12,8 @@ export const PRODUCTS = [
   {
     id: 1, name: 'هدفون بی‌سیم نویزکنسلینگ Aura ANC', price: 1850000, oldPrice: 2200000, rating: 4.8,
     tag: 'پرفروش', category: 'audio', icon: Headphones,
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&q=80',
+    // عکس جدید: هدفون مشکی و شیک با پس‌زمینه تیره
+    image: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&q=80',
     description: 'هدفون بی‌سیم با حذف نویز فعال و صدای دقیق؛ مناسب سفر، کار و گوش دادن طولانی به موسیقی.',
     features: ['نویزکنسلینگ فعال (ANC)', 'تا ۴۰ ساعت شارژدهی', 'بلوتوث ۵.۳', 'میکروفون دوگانه برای مکالمه'],
   },
@@ -33,7 +34,8 @@ export const PRODUCTS = [
   {
     id: 4, name: 'ساعت هوشمند Nova Fit 2', price: 3900000, rating: 4.7,
     tag: 'جدید', category: 'wearable', icon: Watch,
-    image: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?w=800&q=80',
+    // عکس جدید: ساعت هوشمند تیره و مدرن
+    image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=800&q=80',
     description: 'ساعت هوشمند با نمایشگر AMOLED، پایش فعالیت و ضربان قلب و عمر باتری بالا.',
     features: ['نمایشگر AMOLED', 'پایش ضربان و خواب', 'GPS داخلی', 'مقاوم در برابر آب'],
   },
@@ -54,7 +56,8 @@ export const PRODUCTS = [
   {
     id: 7, name: 'پاوربانک ۲۰۰۰۰ میلی‌آمپر FastCharge', price: 650000, rating: 4.4,
     tag: 'شارژ سریع', category: 'accessory', icon: BatteryCharging,
-    image: 'https://images.unsplash.com/photo-1609592806596-b43bada2f4be?w=800&q=80',
+    // عکس جدید: پاوربانک مشکی و ساده
+    image: 'https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800&q=80',
     description: 'پاوربانک پرظرفیت با شارژ سریع ۲۲.۵ واتی برای موبایل، تبلت و لوازم جانبی.',
     features: ['ظرفیت ۲۰۰۰۰ mAh', 'شارژ سریع ۲۲.۵ وات', 'دو خروجی USB + Type-C', 'نمایشگر درصد شارژ'],
   },
