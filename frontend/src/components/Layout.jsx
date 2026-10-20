@@ -6,7 +6,6 @@ import SpaceBackground from './SpaceBackground.jsx'
 export default function Layout() {
   const { pathname, hash } = useLocation()
 
-  // اسکرول به بالا در تغییر صفحه، یا به المان هش (مثل #products)
   useEffect(() => {
     if (hash) {
       const el = document.getElementById(hash.slice(1))
@@ -20,7 +19,6 @@ export default function Layout() {
 
   return (
     <div className="flex min-h-screen flex-col relative">
-      {/* لایه پس‌زمینه فضایی */}
       <SpaceBackground />
 
       <a
@@ -32,12 +30,12 @@ export default function Layout() {
       
       <Header />
       
-      {/* محتوا با z-10 روی پس‌زمینه قرار می‌گیرد */}
-      <main id="main" tabIndex={-1} className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 outline-none">
+      {/* pb-24 اضافه شد تا محتوا از زیر دکمه شناور در بیاد */}
+      <main id="main" tabIndex={-1} className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 pb-24 outline-none">
         <Outlet />
       </main>
       
-      <footer className="glass relative z-10 mt-10 border-x-0 border-b-0 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+      <footer className="relative z-10 border-t border-slate-200 dark:border-white/5 bg-white/50 dark:bg-[#050814]/80 py-6 text-center text-xs text-slate-500 dark:text-slate-400 backdrop-blur-md">
         © فروشگاه هوشمند — نسخه ۱
       </footer>
     </div>
