@@ -6,7 +6,7 @@
   html {
     scroll-behavior: smooth;
   }
-   body {
+  body {
     @apply bg-slate-50 font-sans text-slate-900 antialiased transition-colors duration-300 dark:bg-[#050814] dark:text-slate-100;
     min-height: 100vh;
   }
@@ -31,42 +31,65 @@
 @layer components {
   .glass {
     @apply border bg-white/70 border-slate-200/60 dark:bg-white/5 dark:border-white/10;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
+  
   .glass-strong {
     @apply border bg-white/90 border-slate-200 dark:bg-[#0f172a]/80 dark:border-white/10;
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
   }
+
+  /* بهینه‌سازی افکت شیشه‌ای برای موبایل‌ها */
+  @media (max-width: 768px) {
+    .glass { 
+      backdrop-filter: blur(4px); 
+      -webkit-backdrop-filter: blur(4px); 
+    }
+    .glass-strong { 
+      backdrop-filter: blur(6px); 
+      -webkit-backdrop-filter: blur(6px); 
+    }
+  }
+
   .dark .glass-strong {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
   }
+
   .glass-card {
     @apply glass rounded-2xl transition-all duration-300;
   }
+  
   .glass-card:hover {
     @apply border-brand/50 dark:border-brand/55;
     box-shadow: 0 10px 40px rgba(139, 92, 246, 0.18);
   }
+  
   .btn-brand {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand-dark px-5 py-2.5 text-sm font-bold text-white transition hover:bg-violet-700 active:scale-95;
   }
+  
   .btn-ghost {
     @apply glass inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200/50 dark:text-slate-100 dark:hover:bg-white/10 active:scale-95;
   }
+  
   .text-gradient {
     @apply bg-gradient-to-l from-brand-light via-brand to-indigo-400 bg-clip-text text-transparent;
   }
 }
 
-.chat-scroll::-webkit-scrollbar { width: 6px; }
+/* اسکرول‌بار سفارشی */
+.chat-scroll::-webkit-scrollbar { 
+  width: 6px; 
+}
 .chat-scroll::-webkit-scrollbar-thumb {
   background: rgba(139, 92, 246, 0.4);
   border-radius: 999px;
 }
 
+/* انیمیشن چشمک زدن ستاره‌ها */
 @keyframes twinkle {
   0%, 100% { opacity: 0.2; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.2); }
