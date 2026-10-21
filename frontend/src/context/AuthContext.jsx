@@ -1,34 +1,52 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { loginUser, getCurrentUser, logoutUser } from '../services/api'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(() => localStorage.getItem('admin_token'))
-  const [isAdmin, setIsAdmin] = useState(() => !!localStorage.getItem('admin_token'))
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  // لاگین (فعلاً به صورت تستی. بعداً به API جنگو وصل میشه)
+  // وقتی سایت لود میشه، چک میکنیم کاربر لاگین هست یا نه
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('access_token')
+      if (token) {
+        try {
+          const userData = await getCurrentUser()
+          setUser(userData)
+        } catch (err) {
+          logoutUser() // اگه توکن منقضی شده بود، پاکش کن
+        }
+      }
+      setLoading(false)
+    }
+    initAuth()
+  }, [])
+
   const login = async (username, password) => {
-    // ⚠️ این یه لاگین تستیه. بعداً با fetch به بک‌اند وصل میشه
-    if (username === 'admin' && password === 'admin123') {
-      const fakeToken = 'fake-jwt-token-12345'
-      localStorage.setItem('admin_token', fakeToken)
-      setToken(fakeToken)
-      setIsAdmin(true)
-      return { success: true }
-    } else {
-      return { success: false, message: 'نام کاربری یا رمز عبور اشتباه است.' }
+    try {
+      await loginUser(username, password)
+      const userData = await getCurrentUser()
+      setUser(userData)
+      return { success: true, user: userData }
+    } catch (err) {
+      return { success: false, message: err.message }
     }
   }
 
   const logout = () => {
-    localStorage.removeItem('admin_token')
-    setToken(null)
-    setIsAdmin(false)
+    logoutUser()
+    setUser(null)
   }
 
+  // چک کردن نقش‌ها
+  const isAdmin = user?.is_staff === true
+  const isSeller = user?.is_seller === true
+
   return (
-    <AuthContext.Provider value={{ isAdmin, token, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, isAdmin, isSeller, login, logout, loading }}>
+      {!loading && children}
     </AuthContext.Provider>
   )
 }
