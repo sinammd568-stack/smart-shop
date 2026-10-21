@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, X, Send, Sparkles, Bot, User, Loader2, Plus, Trash2, RefreshCw, WifiOff } from 'lucide-react'
 import { useCart } from '../context/CartContext.jsx'
@@ -17,13 +17,12 @@ const WS_URL = (() => {
 
 const MAX_LEN = 500
 const MAX_RECONNECTS = 6
-// کدهایی که سرور عمداً می‌فرستد (سیاست/حجم) و نباید تلاش مجدد شوند
 const NO_RETRY_CODES = [1008, 1009]
 
 const WELCOME = {
   id: 'welcome',
   role: 'assistant',
-  text: 'سلام! 👋 من دستیار خرید هوشمند هستم. بودجه و نیازت را بگو، مثلاً: «هدفون تا ۲ میلیون می‌خوام».',
+  text: 'سلام! 👋 من دستیار هوشمند هستم. چطور می‌تونم کمکتون کنم؟',
 }
 
 const SUGGESTIONS = ['هدفون تا ۲ میلیون می‌خوام', 'بهترین ساعت هوشمند کدومه؟', 'یه اسپیکر ضدآب پیشنهاد بده']
@@ -81,11 +80,28 @@ export default function AIChat() {
   const fabRef = useRef(null)
   const streamIdRef = useRef(null)
   const openRef = useRef(false)
+  
+  // 👈 گرفتن مسیر فعلی برای تشخیص ادمین بودن
+  const location = useLocation()
+  const isAdminPage = location.pathname.includes('/admin')
 
   const show = useCallback(() => {
     setOpen(true)
     setActivated(true)
   }, [])
+
+  // 👈 وقتی وارد صفحه ادمین میشیم، پیام خوش‌آمدگویی تغییر میکنه
+  useEffect(() => {
+    if (isAdminPage) {
+      setMessages([{
+        id: 'welcome-admin',
+        role: 'assistant',
+        text: 'سلام مدیر! 👋 من مشاور کسب‌وکار شما هستم. می‌تونم در تحلیل آمار فروش، بازخورد به فروشنده‌ها و استراتژی‌های فروش کمکتون کنم.'
+      }])
+    } else {
+      setMessages([WELCOME])
+    }
+  }, [isAdminPage])
 
   useEffect(() => {
     const handler = (e) => {
@@ -214,15 +230,29 @@ export default function AIChat() {
     const ws = wsRef.current
     if (!msg || !ws || ws.readyState !== WebSocket.OPEN) return
     setMessages((prev) => [...prev, { id: nextId(), role: 'user', text: msg }])
-    ws.send(JSON.stringify({ message: msg }))
+    
+    // 👈 اینجا فلگ ادمین رو به همراه پیام به بک‌اند می‌فرستیم
+    ws.send(JSON.stringify({ 
+      message: msg,
+      admin_mode: isAdminPage 
+    }))
+    
     setTyping(true)
     setBusy(true)
     setInput('')
-  }, [])
+  }, [isAdminPage])
 
   const clearChat = () => {
     streamIdRef.current = null
-    setMessages([WELCOME])
+    if (isAdminPage) {
+      setMessages([{
+        id: 'welcome-admin',
+        role: 'assistant',
+        text: 'سلام مدیر! 👋 من مشاور کسب‌وکار شما هستم. چه کمکی می‌تونم بکنم؟'
+      }])
+    } else {
+      setMessages([WELCOME])
+    }
   }
 
   const retry = () => setRetryTick((t) => t + 1)
@@ -241,7 +271,7 @@ export default function AIChat() {
         {open && (
           <motion.section
             role="region"
-            aria-label="دستیار خرید هوشمند"
+            aria-label="دستیار هوشمند"
             initial={{ opacity: 0, y: 20, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
@@ -249,13 +279,15 @@ export default function AIChat() {
             className="glass-strong fixed bottom-24 right-4 z-50 flex h-[34rem] max-h-[calc(100dvh-7rem)] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-3xl sm:right-6 border border-slate-200 dark:border-white/10 shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-brand/20 px-4 py-3">
+            <div className={`flex items-center justify-between border-b border-slate-200 dark:border-white/10 px-4 py-3 ${isAdminPage ? 'bg-indigo-500/10 dark:bg-indigo-500/20' : 'bg-slate-50 dark:bg-brand/20'}`}>
               <div className="flex items-center gap-3">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-dark text-white shadow-md">
+                <span className={`grid h-9 w-9 place-items-center rounded-xl text-white shadow-md ${isAdminPage ? 'bg-indigo-600' : 'bg-brand-dark'}`}>
                   <Sparkles size={18} />
                 </span>
                 <div>
-                  <h2 className="text-sm font-extrabold text-slate-800 dark:text-white">دستیار خرید هوشمند</h2>
+                  <h2 className="text-sm font-extrabold text-slate-800 dark:text-white">
+                    {isAdminPage ? 'مشاور کسب‌وکار' : 'دستیار خرید هوشمند'}
+                  </h2>
                   <p className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-300">
                     <span className={`h-2 w-2 rounded-full ${statusColor}`} aria-hidden="true" />
                     {statusLabel}
@@ -268,7 +300,6 @@ export default function AIChat() {
                   disabled={busy || messages.length === 1}
                   className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-200 hover:text-slate-800 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-white disabled:opacity-40 transition-colors"
                   aria-label="پاک کردن گفتگو"
-                  title="پاک کردن گفتگو"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -286,18 +317,15 @@ export default function AIChat() {
             <div
               role="log"
               aria-live="polite"
-              aria-relevant="additions text"
-              aria-label="پیام‌های گفتگو"
               className="chat-scroll flex-1 space-y-3 overflow-y-auto p-4"
             >
               {messages.map((m) => (
                 <div key={m.id} className={`flex gap-2 ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
                   <span
-                    aria-hidden="true"
                     className={`grid h-7 w-7 shrink-0 place-items-center rounded-full ${
                       m.role === 'user' 
                         ? 'bg-slate-200 text-slate-600 dark:bg-white/15 dark:text-white' 
-                        : 'bg-brand/20 text-brand-dark dark:bg-brand/40 dark:text-brand-light'
+                        : isAdminPage ? 'bg-indigo-500/20 text-indigo-600 dark:bg-indigo-500/40 dark:text-indigo-300' : 'bg-brand/20 text-brand-dark dark:bg-brand/40 dark:text-brand-light'
                     }`}
                   >
                     {m.role === 'user' ? <User size={14} /> : <Bot size={14} />}
@@ -327,7 +355,7 @@ export default function AIChat() {
                 </div>
               )}
 
-              {messages.length === 1 && (
+              {messages.length === 1 && !isAdminPage && (
                 <div className="flex flex-wrap gap-2 pt-1">
                   {SUGGESTIONS.map((s) => (
                     <button
@@ -367,23 +395,18 @@ export default function AIChat() {
                   disabled={status !== 'open'}
                   autoComplete="off"
                   aria-label="پیام شما"
-                  placeholder={status === 'open' ? 'پیامت را بنویس…' : 'در حال برقراری اتصال…'}
+                  placeholder={status === 'open' ? (isAdminPage ? 'سوال مدیریتی بپرسید…' : 'پیامت را بنویس…') : 'در حال برقراری اتصال…'}
                   className="glass min-w-0 flex-1 rounded-xl px-3.5 py-2.5 text-base outline-none placeholder:text-slate-400 focus:border-brand dark:text-white sm:text-sm"
                 />
                 <button
                   type="submit"
                   disabled={status !== 'open' || !input.trim() || busy}
-                  className="btn-brand !px-3 disabled:cursor-not-allowed disabled:opacity-40"
+                  className={`!px-3 disabled:cursor-not-allowed disabled:opacity-40 text-white rounded-xl py-2.5 font-bold transition ${isAdminPage ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-brand-dark hover:bg-violet-700'}`}
                   aria-label="ارسال"
                 >
                   <Send size={16} className="-scale-x-100" />
                 </button>
               </div>
-              {input.length > MAX_LEN - 100 && (
-                <p className="mt-1.5 text-left text-[11px] text-slate-400" aria-live="polite">
-                  {fmt(input.length)} / {fmt(MAX_LEN)}
-                </p>
-              )}
             </form>
           </motion.section>
         )}
@@ -398,13 +421,13 @@ export default function AIChat() {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.93 }}
         onClick={() => (open ? setOpen(false) : show())}
-        className="fixed bottom-6 right-4 z-50 grid h-14 w-14 cursor-grab active:cursor-grabbing place-items-center rounded-full bg-brand-dark text-white shadow-xl shadow-brand/30 dark:shadow-brand/50 sm:right-6"
-        aria-label={open ? 'بستن دستیار خرید' : unread > 0 ? `باز کردن دستیار خرید، ${fmt(unread)} پیام جدید` : 'باز کردن دستیار خرید'}
+        className={`fixed bottom-6 right-4 z-50 grid h-14 w-14 cursor-grab active:cursor-grabbing place-items-center rounded-full text-white shadow-xl sm:right-6 ${isAdminPage ? 'bg-indigo-600 shadow-indigo-500/30' : 'bg-brand-dark shadow-brand/30 dark:shadow-brand/50'}`}
+        aria-label={open ? 'بستن دستیار' : 'باز کردن دستیار'}
         aria-expanded={open}
       >
         {open ? <X size={24} /> : <MessageCircle size={24} />}
         {!open && unread === 0 && (
-          <span aria-hidden="true" className="absolute inset-0 -z-10 animate-ping rounded-full bg-brand/40 motion-reduce:animate-none" />
+          <span aria-hidden="true" className={`absolute inset-0 -z-10 animate-ping rounded-full motion-reduce:animate-none ${isAdminPage ? 'bg-indigo-500/40' : 'bg-brand/40'}`} />
         )}
         {!open && unread > 0 && (
           <span aria-hidden="true" className="absolute -left-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-red-500 px-1 text-[11px] font-bold">
