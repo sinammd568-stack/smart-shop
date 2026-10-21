@@ -6,7 +6,8 @@ const getAuthHeaders = () => {
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
-// لاگین کردن و گرفتن توکن
+// ---------------- احراز هویت ----------------
+
 export const loginUser = async (username, password) => {
   const res = await fetch(`${API_URL}/api/token/`, {
     method: 'POST',
@@ -20,7 +21,6 @@ export const loginUser = async (username, password) => {
   return data;
 };
 
-// گرفتن اطلاعات کاربر فعلی
 export const getCurrentUser = async () => {
   const res = await fetch(`${API_URL}/api/users/me/`, {
     headers: { ...getAuthHeaders() }
@@ -29,17 +29,18 @@ export const getCurrentUser = async () => {
   return await res.json();
 };
 
-// خروج از حساب
 export const logoutUser = () => {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
 };
 
-// توابع محصولات
+// ---------------- محصولات ----------------
+
 export const fetchProducts = async () => {
   const res = await fetch(`${API_URL}/api/products/`);
   if (!res.ok) throw new Error('خطا در دریافت محصولات');
   const data = await res.json();
+  // پشتیبانی از هر دو حالت صفحه‌بندی شده و لیست ساده
   return data.results || data; 
 };
 
@@ -49,7 +50,6 @@ export const fetchProductById = async (id) => {
   return await res.json();
 };
 
-// اضافه کردن محصول (نیاز به توکن)
 export const createProduct = async (productData) => {
   const res = await fetch(`${API_URL}/api/products/`, {
     method: 'POST',
@@ -63,7 +63,8 @@ export const createProduct = async (productData) => {
   return await res.json();
 };
 
-// ساخت فروشنده جدید (فقط ادمین - نیاز به توکن)
+// ---------------- مدیریت کاربران و فروشندگان ----------------
+
 export const createSeller = async (sellerData) => {
   const res = await fetch(`${API_URL}/api/users/`, {
     method: 'POST',
@@ -73,11 +74,20 @@ export const createSeller = async (sellerData) => {
     },
     body: JSON.stringify({ ...sellerData, is_seller: true }),
   });
-  if (!res.ok) throw new Error('خطا در ساخت فروشنده');
+  if (!res.ok) throw new Error('خطا در ساخت فروشنده (احتمالاً نام کاربری تکراری است)');
   return await res.json();
 };
 
-// ثبت سفارش
+export const getSellerStats = async () => {
+  const res = await fetch(`${API_URL}/api/users/stats/`, {
+    headers: { ...getAuthHeaders() }
+  });
+  if (!res.ok) throw new Error('خطا در دریافت آمار فروشندگان');
+  return await res.json();
+};
+
+// ---------------- سفارشات ----------------
+
 export const createOrder = async (orderData) => {
   const res = await fetch(`${API_URL}/api/orders/`, {
     method: 'POST',
