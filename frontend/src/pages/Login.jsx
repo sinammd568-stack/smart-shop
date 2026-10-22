@@ -20,19 +20,23 @@ export default function Login() {
   // صفحه‌ای که کاربر می‌خواست بره (مثلاً /admin)
   const from = location.state?.from?.pathname || '/admin'
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
 
-    // شبیه‌سازی تاخیر شبکه
-    await new Promise(r => setTimeout(r, 800))
-    
     const res = await login(username, password)
     setLoading(false)
 
     if (res.success) {
-      navigate(from, { replace: true })
+      // 👈 هدایت بر اساس نقش
+      if (res.user.is_staff) {
+        navigate('/admin', { replace: true })
+      } else if (res.user.is_seller) {
+        navigate('/seller', { replace: true })
+      } else {
+        navigate('/', { replace: true }) // کاربر عادی
+      }
     } else {
       setError(res.message)
     }
