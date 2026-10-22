@@ -4,9 +4,9 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MessageCircle, X, Send, Sparkles, Bot, User, Loader2, Plus, Trash2, RefreshCw, WifiOff } from 'lucide-react'
 import { useCart } from '../context/CartContext.jsx'
 import { useToast } from '../context/ToastContext.jsx'
-import { fmt, getProduct } from '../data/products.js'
+import { fmt } from '../data/products.js'
+import { fetchProductById } from '../services/api.js' // 👈 ایمپورت شد
 
-// در صفحه‌های HTTPS اتصال ناامن ws:// توسط مرورگر بلاک می‌شود؛ خودکار به wss:// ارتقا می‌دهیم.
 const WS_URL = (() => {
   let url = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws/chat/'
   if (typeof window !== 'undefined' && window.location.protocol === 'https:' && url.startsWith('ws://')) {
@@ -30,18 +30,30 @@ const SUGGESTIONS = ['هدفون تا ۲ میلیون می‌خوام', 'بهت�
 let idCounter = 0
 const nextId = () => `m${Date.now()}_${idCounter++}`
 
+// 👈 کامپوننت کارت محصول که حالا از دیتابیس می‌خونه
 function MiniProduct({ id }) {
-  const product = getProduct(id)
+  const [product, setProduct] = useState(null)
   const { addItem } = useCart()
   const { toast } = useToast()
-  if (!product) return null
-  const Icon = product.icon
+
+  useEffect(() => {
+    fetchProductById(id)
+      .then(data => setProduct(data))
+      .catch(err => console.error("Error loading product in chat:", err))
+  }, [id])
+
+  // حالت لودینگ
+  if (!product) {
+    return <div className="animate-pulse bg-slate-200 dark:bg-white/10 h-16 rounded-xl w-full"></div>
+  }
 
   return (
-    <div className="glass flex items-center gap-3 rounded-xl p-2.5">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-brand/15 text-brand-dark dark:bg-brand/25 dark:text-brand-light">
-        <Icon size={20} />
-      </span>
+    <div className="glass flex items-center gap-3 rounded-xl p-2.5 mt-2">
+      <img 
+        src={product.image} 
+        alt={product.name} 
+        className="h-10 w-10 shrink-0 rounded-lg object-cover bg-slate-100" 
+      />
       <div className="min-w-0 flex-1">
         <Link to={`/product/${product.id}`} className="block truncate text-xs font-bold hover:text-brand-dark dark:hover:text-brand-light text-slate-800 dark:text-slate-200">
           {product.name}
@@ -81,7 +93,6 @@ export default function AIChat() {
   const streamIdRef = useRef(null)
   const openRef = useRef(false)
   
-  // 👈 گرفتن مسیر فعلی برای تشخیص ادمین بودن
   const location = useLocation()
   const isAdminPage = location.pathname.includes('/admin')
 
@@ -90,7 +101,6 @@ export default function AIChat() {
     setActivated(true)
   }, [])
 
-  // 👈 وقتی وارد صفحه ادمین میشیم، پیام خوش‌آمدگویی تغییر میکنه
   useEffect(() => {
     if (isAdminPage) {
       setMessages([{
@@ -231,7 +241,6 @@ export default function AIChat() {
     if (!msg || !ws || ws.readyState !== WebSocket.OPEN) return
     setMessages((prev) => [...prev, { id: nextId(), role: 'user', text: msg }])
     
-    // 👈 اینجا فلگ ادمین رو به همراه پیام به بک‌اند می‌فرستیم
     ws.send(JSON.stringify({ 
       message: msg,
       admin_mode: isAdminPage 
@@ -278,7 +287,6 @@ export default function AIChat() {
             transition={{ duration: 0.2 }}
             className="glass-strong fixed bottom-24 right-4 z-50 flex h-[34rem] max-h-[calc(100dvh-7rem)] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-3xl sm:right-6 border border-slate-200 dark:border-white/10 shadow-2xl"
           >
-            {/* Header */}
             <div className={`flex items-center justify-between border-b border-slate-200 dark:border-white/10 px-4 py-3 ${isAdminPage ? 'bg-indigo-500/10 dark:bg-indigo-500/20' : 'bg-slate-50 dark:bg-brand/20'}`}>
               <div className="flex items-center gap-3">
                 <span className={`grid h-9 w-9 place-items-center rounded-xl text-white shadow-md ${isAdminPage ? 'bg-indigo-600' : 'bg-brand-dark'}`}>
@@ -313,7 +321,6 @@ export default function AIChat() {
               </div>
             </div>
 
-            {/* Messages */}
             <div
               role="log"
               aria-live="polite"
@@ -372,7 +379,6 @@ export default function AIChat() {
               <div ref={endRef} />
             </div>
 
-            {/* Connection banner */}
             {gaveUp && (
               <div className="flex items-center justify-between gap-2 border-t border-red-400/30 bg-red-50 dark:bg-red-500/10 px-4 py-2 text-xs text-red-600 dark:text-red-200">
                 <span className="flex items-center gap-2">
@@ -384,7 +390,6 @@ export default function AIChat() {
               </div>
             )}
 
-            {/* Input */}
             <form onSubmit={onSubmit} className="border-t border-slate-200 dark:border-white/10 p-3 bg-white/50 dark:bg-transparent">
               <div className="flex items-center gap-2">
                 <input
@@ -412,7 +417,6 @@ export default function AIChat() {
         )}
       </AnimatePresence>
 
-      {/* FAB - دکمه شناور قابل جابجایی */}
       <motion.button
         ref={fabRef}
         drag
