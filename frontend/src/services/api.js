@@ -57,12 +57,21 @@ export const createProduct = async (productData) => {
   const res = await fetch(`${API_URL}/api/products/`, {
     method: 'POST',
     headers: { 
-      'Content-Type': 'application/json',
-      ...getAuthHeaders()
+      ...getAuthHeaders() 
     },
-    body: JSON.stringify(productData),
+    body: productData,
   });
-  if (!res.ok) throw new Error('خطا در ثبت محصول');
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    console.error("Server Error:", err); // 👈 این خط خطا رو دقیق تو کنسول چاپ میکنه
+    let errorMsg = 'خطا در ثبت محصول';
+    if (err.detail) errorMsg = err.detail;
+    else if (typeof err === 'object') {
+      // استخراج پیام خطا از فیلدهای مختلف
+      errorMsg = Object.keys(err).map(key => `${key}: ${err[key]}`).join(' | ');
+    }
+    throw new Error(errorMsg);
+  }
   return await res.json();
 };
 
