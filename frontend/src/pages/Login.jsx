@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -67,7 +67,6 @@ export default function Login() {
       const res = await login(username, password)
       
       if (res.success) {
-        // ذخیره نام کاربری در صورت انتخاب "مرا به خاطر بسپار"
         if (rememberMe) {
           safeSet(REMEMBER_KEY, username)
         } else {
@@ -99,33 +98,22 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-[#030612] transition-colors duration-500 py-10 px-4">
+    // 👈 پس‌زمینه رو کردم bg-transparent تا با کل سایت یکپارچه بشه
+    // 👈 ارتفاع رو کردم min-h-[calc(100dvh-4rem)] تا دقیقا اندازه صفحه منهای هدر باشه و فوتر رو هل نده
+    <div className="relative min-h-[calc(100dvh-4rem)] flex items-center justify-center overflow-hidden bg-transparent py-10 px-4">
       
-      {/* ===== پس‌زمینه فضایی و شناور ===== */}
+      {/* ===== افکت‌های نئونی اختصاصی صفحه لاگین ===== */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        {/* سحابی‌های نوری */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] bg-brand/20 dark:bg-brand/30 blur-[120px] rounded-full animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-indigo-500/20 dark:bg-indigo-600/20 blur-[100px] rounded-full animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] sm:w-[450px] h-[300px] sm:h-[450px] bg-brand/30 dark:bg-brand/40 blur-[100px] sm:blur-[120px] rounded-full animate-pulse"></div>
         
-        {/* ستاره‌ها */}
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={`star-${i}`}
-            className="absolute w-1 h-1 bg-slate-800 dark:bg-white rounded-full opacity-0 dark:opacity-50"
-            style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-            animate={{ opacity: [0, 0.8, 0], scale: [0, 1.5, 0] }}
-            transition={{ duration: Math.random() * 3 + 2, repeat: Infinity, delay: Math.random() * 2 }}
-          />
-        ))}
-
-        {/* آیکون‌های شناور دسته‌بندی (فقط دسکتاپ) */}
+        {/* آیکون‌های شناور */}
         <div className="hidden lg:block absolute inset-0">
           {FLOATERS.map((f, i) => {
             const Icon = f.icon
             return (
               <motion.div
                 key={i}
-                className={`absolute ${f.pos} flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition-opacity`}
+                className={`absolute ${f.pos} flex flex-col items-center gap-2 opacity-50 hover:opacity-100 transition-opacity`}
                 animate={{ y: [0, -15, 0] }}
                 transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: f.delay }}
               >
@@ -139,7 +127,7 @@ export default function Login() {
         </div>
       </div>
 
-      {/* ===== کارت اصلی ===== */}
+      {/* ===== کارت اصلی (شیشه شفاف) ===== */}
       <motion.div
         animate={{ y: [0, -8, 0] }} 
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
@@ -147,8 +135,7 @@ export default function Login() {
       >
         <div 
           id="floating-card"
-          // 👈 باکس شیشه‌ای کاملاً شفاف (bg-transparent) با بلور فوق‌العاده قوی
-          className="rounded-3xl border border-slate-300/30 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-6 sm:p-8 flex flex-col justify-center bg-white/40 dark:bg-transparent backdrop-blur-3xl relative overflow-hidden min-h-[420px]"
+          className="rounded-3xl border border-slate-300/40 dark:border-white/20 p-6 sm:p-8 flex flex-col justify-center bg-white/10 dark:bg-white/5 backdrop-blur-2xl relative overflow-hidden min-h-[420px] shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]"
         >
           {/* نوار نور بالای کارت */}
           <div className={`absolute top-0 left-10 right-10 h-[2px] transition-colors duration-500 ${
@@ -169,7 +156,7 @@ export default function Login() {
                 className="w-full"
               >
                 <div className="text-center mb-6">
-                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-brand to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(139,92,246,0.5)]">
+                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-brand to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(139,92,246,0.6)]">
                     <User className="text-white" size={28} />
                   </div>
                   <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white">ورود به سیستم</h2>
@@ -192,7 +179,7 @@ export default function Login() {
                       value={username}
                       onChange={e => setUsername(e.target.value)}
                       placeholder="نام کاربری"
-                      className="w-full bg-white/60 dark:bg-black/40 border border-slate-300/50 dark:border-white/10 rounded-xl py-3.5 pr-12 pl-4 text-base sm:text-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand/50 text-slate-800 dark:text-white transition-all relative z-0 dir-ltr text-left placeholder:text-slate-400"
+                      className="w-full bg-white/50 dark:bg-black/40 border border-slate-300/50 dark:border-white/10 rounded-xl py-3.5 pr-12 pl-4 text-base sm:text-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand/50 text-slate-800 dark:text-white transition-all relative z-0 dir-ltr text-left placeholder:text-slate-400"
                       required
                       autoFocus
                     />
@@ -201,7 +188,7 @@ export default function Login() {
                   <button 
                     type="submit" 
                     disabled={!username}
-                    className="relative w-full py-3.5 rounded-xl bg-brand-dark text-white font-bold text-sm overflow-hidden group shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="relative w-full py-3.5 rounded-xl bg-brand-dark text-white font-bold text-sm overflow-hidden group shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all hover:shadow-[0_0_30px_rgba(139,92,246,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span className="relative flex items-center justify-center gap-2">
                       ادامه <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
@@ -209,10 +196,9 @@ export default function Login() {
                   </button>
                 </form>
                 
-                {/* ویژگی‌های فروشگاه (زیر فرم) */}
-                <div className="mt-8 pt-5 border-t border-slate-300/50 dark:border-white/10 space-y-2">
+                <div className="mt-8 pt-5 border-t border-slate-400/30 dark:border-white/10 space-y-2">
                   {BULLETS.map((b, i) => (
-                    <div key={i} className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400">
+                    <div key={i} className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-300 font-medium">
                       <b.icon size={14} className="text-brand" /> {b.text}
                     </div>
                   ))}
@@ -231,14 +217,14 @@ export default function Login() {
                 className="w-full"
               >
                 <div className="text-center mb-6">
-                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(16,185,129,0.5)]">
+                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(16,185,129,0.6)]">
                     <Lock className="text-white" size={28} />
                   </div>
                   <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white">رمز عبور</h2>
                   <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 flex items-center justify-center gap-1 font-medium">
                     <ShieldCheck size={12} className="text-emerald-500" /> مرحله ۲: احراز هویت
                   </p>
-                  <div className="mt-3 inline-block bg-white/60 dark:bg-black/40 border border-slate-300/50 dark:border-white/10 px-3 py-1 rounded-full text-xs font-mono text-slate-700 dark:text-slate-300 dir-ltr">
+                  <div className="mt-3 inline-block bg-white/60 dark:bg-black/40 border border-slate-300/50 dark:border-white/10 px-3 py-1 rounded-full text-xs font-mono text-slate-800 dark:text-slate-200 dir-ltr shadow-sm">
                     {username}
                   </div>
                 </div>
@@ -257,7 +243,7 @@ export default function Login() {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-white/60 dark:bg-black/40 border border-slate-300/50 dark:border-white/10 rounded-xl py-3.5 pr-12 pl-12 text-base sm:text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-slate-800 dark:text-white transition-all relative z-0 dir-ltr text-left placeholder:text-slate-400"
+                      className="w-full bg-white/50 dark:bg-black/40 border border-slate-300/50 dark:border-white/10 rounded-xl py-3.5 pr-12 pl-12 text-base sm:text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-slate-800 dark:text-white transition-all relative z-0 dir-ltr text-left placeholder:text-slate-400"
                       required
                       autoFocus
                     />
@@ -271,8 +257,7 @@ export default function Login() {
                     </button>
                   </div>
 
-                  {/* چک‌باکس مرا به خاطر بسپار */}
-                  <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer w-fit">
+                  <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer w-fit font-medium">
                     <input 
                       type="checkbox" 
                       checked={rememberMe}
@@ -286,7 +271,7 @@ export default function Login() {
                     <button 
                       type="submit" 
                       disabled={loading || !password}
-                      className="relative w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm overflow-hidden group shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm overflow-hidden group shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all hover:shadow-[0_0_30px_rgba(16,185,129,0.7)] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="relative flex items-center justify-center gap-2">
                         {loading ? (
@@ -300,7 +285,7 @@ export default function Login() {
                     <button 
                       type="button" 
                       onClick={() => { setStep(1); setError(''); setPassword('') }}
-                      className="text-[11px] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1 transition-colors py-1"
+                      className="text-[11px] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1 transition-colors py-1 font-medium"
                     >
                       <ArrowRight size={14} /> تغییر نام کاربری
                     </button>
