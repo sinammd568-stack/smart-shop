@@ -100,7 +100,7 @@ export default function Home() {
       <section className="pt-16 pb-8 text-center md:pt-24 relative z-10">
         <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
           <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">
-            SHOP <span className="text-gradient drop-shadow-[0_0_30px_rgba(139,92,246,0.3)]">SMART</span>
+            SMART <span className="text-gradient drop-shadow-[0_0_30px_rgba(139,92,246,0.3)]">SHOP</span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg md:text-xl text-slate-500 dark:text-slate-400 leading-relaxed">
             تجربه‌ای متفاوت از خرید دیجیتال. سریع، دقیق و مجهز به هوش مصنوعی.
