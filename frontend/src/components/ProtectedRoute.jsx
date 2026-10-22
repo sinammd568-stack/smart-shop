@@ -2,14 +2,15 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
 export default function ProtectedRoute() {
-  const { isAdmin } = useAuth()
+  // 👈 حالا هم ادمین و هم فروشنده رو چک میکنیم
+  const { isAdmin, isSeller } = useAuth() 
   const location = useLocation()
 
-  if (!isAdmin) {
-    // کاربر لاگین نکرده، هدایت به صفحه لاگین
+  // اگه نه ادمین بود نه فروشنده، بفرستش صفحه لاگین
+  if (!isAdmin && !isSeller) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  // کاربر لاگین کرده، اجازه دسترسی به محتوای داخل (مثل داشبورد) رو بده
+  // اگه لاگین بود، اجازه بده بره داخل
   return <Outlet />
 }
