@@ -20,6 +20,7 @@ export default function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/login" element={<Login />} />
           
+          {/* مسیرهای محافظت شده */}
           <Route element={<ProtectedRoute />}>
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/seller" element={<SellerDashboard />} /> {/* 👈 اضافه شد */}
