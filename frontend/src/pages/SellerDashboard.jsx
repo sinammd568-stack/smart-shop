@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { PlusCircle, Image as ImageIcon, Loader2, Store, X, CheckCircle2 } from 'lucide-react'
+import { PlusCircle, Image as ImageIcon, Loader2, Store, X, CheckCircle2, Info } from 'lucide-react'
 import usePageTitle from '../hooks/usePageTitle.js'
 import { createProduct, fetchProducts } from '../services/api.js'
 import { useAuth } from '../context/AuthContext.jsx'
@@ -72,7 +72,7 @@ export default function SellerDashboard() {
       
       loadMyProducts() 
     } catch (err) {
-      toast(err.message || 'خطا در اضافه کردن محصول')
+      toast(err.message || 'خطا در اضافه کردن محصول', 'error')
     } finally {
       setSubmitting(false)
     }
@@ -102,21 +102,23 @@ export default function SellerDashboard() {
               <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">عکس محصول</label>
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full h-40 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors overflow-hidden relative"
+                className="w-full h-48 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 transition-colors overflow-hidden relative"
               >
                 {imagePreview ? (
                   <>
+                    {/* پیش‌نمایش دقیقا شبیه کارت محصول */}
                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     <button 
                       type="button" 
                       onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(null); if (fileInputRef.current) fileInputRef.current.value = '' }} 
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
-                    ><X size={14} /></button>
+                      className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full shadow-lg"
+                    ><X size={16} /></button>
                   </>
                 ) : (
                   <>
                     <ImageIcon size={32} className="text-slate-400 mb-2" />
-                    <span className="text-xs text-slate-500">برای انتخاب عکس کلیک کنید</span>
+                    <span className="text-xs text-slate-500 font-bold">برای انتخاب عکس کلیک کنید</span>
+                    <span className="text-[10px] text-slate-400 mt-1">نسبت ۱:۱ (مربعی) بهترین نتیجه رو داره</span>
                   </>
                 )}
               </div>
@@ -125,17 +127,17 @@ export default function SellerDashboard() {
 
             <div>
               <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">نام محصول</label>
-              <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full glass px-3 py-2 rounded-lg text-sm dark:text-white" placeholder="مثلا: هدفون بی‌سیم" />
+              <input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full glass px-3 py-2 rounded-lg text-sm dark:text-white" placeholder="مثلا: اسپیکر بلوتوثی ضدآب" />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">قیمت (تومان)</label>
-                <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full glass px-3 py-2 rounded-lg text-sm dark:text-white" placeholder="1500000" />
+                <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full glass px-3 py-2 rounded-lg text-sm dark:text-white" placeholder="مثلا: 1500000" />
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">قیمت قبلی (اختیاری)</label>
-                <input type="number" value={formData.old_price} onChange={e => setFormData({...formData, old_price: e.target.value})} className="w-full glass px-3 py-2 rounded-lg text-sm dark:text-white" placeholder="2000000" />
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">قیمت قبل از تخفیف</label>
+                <input type="number" value={formData.old_price} onChange={e => setFormData({...formData, old_price: e.target.value})} className="w-full glass px-3 py-2 rounded-lg text-sm dark:text-white" placeholder="مثلا: 2000000" />
               </div>
             </div>
 
@@ -149,14 +151,17 @@ export default function SellerDashboard() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">برچسب</label>
-                <input value={formData.tag} onChange={e => setFormData({...formData, tag: e.target.value})} className="w-full glass px-3 py-2 rounded-lg text-sm dark:text-white" placeholder="جدید" />
+                <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">برچسب (Tag)</label>
+                <input value={formData.tag} onChange={e => setFormData({...formData, tag: e.target.value})} className="w-full glass px-3 py-2 rounded-lg text-sm dark:text-white" placeholder="مثلا: جدید، پرفروش" />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">توضیحات و مشخصات</label>
-              <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows="4" className="w-full glass px-3 py-2 rounded-lg text-sm dark:text-white" placeholder="مشخصات فنی و ویژگی‌های محصول..."></textarea>
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1 flex items-center justify-between">
+                توضیحات و مشخصات
+                <span className="text-[10px] text-slate-400 font-normal flex items-center gap-1"><Info size={12}/> ویژگی‌ها رو با کاما جدا کنید</span>
+              </label>
+              <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} rows="4" className="w-full glass px-3 py-2 rounded-lg text-sm dark:text-white" placeholder="مثال: باتری ۲۰ ساعته، اتصال بلوتوث ۵.۰، مقاوم در برابر آب، دارای میکروفون..."></textarea>
             </div>
 
             <button type="submit" disabled={submitting} className="btn-brand w-full py-3">
