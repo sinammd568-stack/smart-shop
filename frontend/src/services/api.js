@@ -1,6 +1,10 @@
 const API_URL = import.meta.env.VITE_API_URL || 'https://smart-shop-api-mw7l.onrender.com';
 
-// تابع کمکی برای گرفتن هدرها با توکن
+// ==========================================
+// ابزارهای کمکی (Helpers)
+// ==========================================
+
+// گرفتن هدرها همراه با توکن برای درخواست‌های احراز هویت شده
 const getAuthHeaders = () => {
   const token = localStorage.getItem('access_token');
   return token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -44,7 +48,7 @@ export const fetchProducts = async () => {
   const res = await fetch(`${API_URL}/api/products/`);
   if (!res.ok) throw new Error('خطا در دریافت محصولات');
   const data = await res.json();
-  return data.results || data; 
+  return data.results || data;
 };
 
 export const fetchProductById = async (id) => {
@@ -54,20 +58,23 @@ export const fetchProductById = async (id) => {
 };
 
 export const createProduct = async (productData) => {
+  // نکته: برای آپلود فایل (FormData)، نباید Content-Type رو ست کنیم
   const res = await fetch(`${API_URL}/api/products/`, {
     method: 'POST',
     headers: { 
       ...getAuthHeaders() 
     },
-    body: productData,
+    body: productData, 
   });
+  
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    console.error("Server Error:", err); // 👈 این خط خطا رو دقیق تو کنسول چاپ میکنه
+    console.error("Server Error:", err);
+    
+    // استخراج پیام خطا از فیلدهای مختلف جنگو
     let errorMsg = 'خطا در ثبت محصول';
     if (err.detail) errorMsg = err.detail;
     else if (typeof err === 'object') {
-      // استخراج پیام خطا از فیلدهای مختلف
       errorMsg = Object.keys(err).map(key => `${key}: ${err[key]}`).join(' | ');
     }
     throw new Error(errorMsg);
@@ -88,8 +95,8 @@ export const createSeller = async (sellerData) => {
     },
     body: JSON.stringify({ ...sellerData, is_seller: true }),
   });
+  
   if (!res.ok) {
-    // تلاش برای خواندن پیام خطای دقیق از بک‌اند (مثلا نام کاربری تکراری)
     const errorData = await res.json().catch(() => ({}));
     const msg = errorData.username ? 'این نام کاربری قبلا گرفته شده است.' : 'خطا در ساخت فروشنده';
     throw new Error(msg);
@@ -124,7 +131,11 @@ export const createOrder = async (orderData) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(orderData),
   });
-  if (!res.ok) throw new Error('خطا در ثبت سفارش');
+  
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'خطا در ثبت سفارش');
+  }
   return await res.json();
 };
 
