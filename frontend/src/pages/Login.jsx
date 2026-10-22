@@ -20,7 +20,7 @@ export default function Login() {
   // صفحه‌ای که کاربر می‌خواست بره (مثلاً /admin)
   const from = location.state?.from?.pathname || '/admin'
 
-    const handleSubmit = async (e) => {
+      const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
