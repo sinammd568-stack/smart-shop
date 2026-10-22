@@ -1,15 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Lock, User, Eye, EyeOff, ShieldAlert, ArrowLeft, ArrowRight, Loader2, Terminal, ShieldCheck } from 'lucide-react'
+import {
+  Lock, User, Eye, EyeOff, ShieldAlert, ArrowLeft, ArrowRight, Loader2, ShieldCheck,
+  Sparkles, Truck, Headphones, Watch, Keyboard, Terminal
+} from 'lucide-react'
 import { useAuth } from '../context/AuthContext.jsx'
 import usePageTitle from '../hooks/usePageTitle.js'
 
+const REMEMBER_KEY = 'remembered-username'
+
+const safeGet = (k) => {
+  try { return localStorage.getItem(k) || '' } catch { return '' }
+}
+const safeSet = (k, v) => {
+  try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k) } catch { /* ignore */ }
+}
+
+const FLOATERS = [
+  { icon: Headphones, label: 'صوتی', color: 'from-blue-500 to-cyan-500', pos: 'top-[15%] right-[10%]', delay: 0 },
+  { icon: Watch, label: 'پوشیدنی', color: 'from-green-500 to-emerald-500', pos: 'top-[45%] left-[8%]', delay: 1.5 },
+  { icon: Keyboard, label: 'لوازم جانبی', color: 'from-orange-500 to-red-500', pos: 'bottom-[15%] right-[15%]', delay: 3 },
+]
+
+const BULLETS = [
+  { icon: Truck, text: 'ارسال سریع در کمتر از ۴۸ ساعت' },
+  { icon: ShieldCheck, text: 'ضمانت اصالت و گارانتی معتبر' },
+  { icon: Sparkles, text: 'مشاور هوشمند خرید' },
+]
+
 export default function Login() {
-  usePageTitle('ورود امن به سیستم')
+  usePageTitle('ورود به حساب کاربری')
+  
   const [step, setStep] = useState(1)
-  const [username, setUsername] = useState('')
+  const [username, setUsername] = useState(safeGet(REMEMBER_KEY))
   const [password, setPassword] = useState('')
+  const [rememberMe, setRememberMe] = useState(!!safeGet(REMEMBER_KEY))
   const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -41,6 +67,13 @@ export default function Login() {
       const res = await login(username, password)
       
       if (res.success) {
+        // ذخیره نام کاربری در صورت انتخاب "مرا به خاطر بسپار"
+        if (rememberMe) {
+          safeSet(REMEMBER_KEY, username)
+        } else {
+          safeSet(REMEMBER_KEY, '')
+        }
+
         if (res.user.is_staff) {
           navigate('/admin', { replace: true })
         } else if (res.user.is_seller) {
@@ -53,7 +86,7 @@ export default function Login() {
         const card = document.getElementById('floating-card')
         if (card) {
           card.animate(
-            { transform: ['translateX(0)', 'translateX(-6px)', 'translateX(6px)', 'translateX(-6px)', 'translateX(6px)', 'translateX(0)'] },
+            { transform: ['translateX(0)', 'translateX(-8px)', 'translateX(8px)', 'translateX(-8px)', 'translateX(8px)', 'translateX(0)'] },
             { duration: 400, easing: 'ease-in-out' }
           )
         }
@@ -66,27 +99,47 @@ export default function Login() {
   }
 
   return (
-    <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-[#030612] transition-colors duration-500 py-6 px-4 sm:py-10">
+    <div className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-[#030612] transition-colors duration-500 py-10 px-4">
       
-      {/* ===== پس‌زمینه فضایی ===== */}
+      {/* ===== پس‌زمینه فضایی و شناور ===== */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        {/* سحابی‌های نوری (دقیقاً پشت کارت قرار گرفتند تا از پشت شیشه دیده شوند) */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] bg-brand/30 dark:bg-brand/40 blur-[100px] sm:blur-[130px] rounded-full animate-pulse"></div>
-        <div className="absolute top-[40%] left-[60%] -translate-x-1/2 -translate-y-1/2 w-[250px] sm:w-[400px] h-[250px] sm:h-[400px] bg-indigo-500/20 dark:bg-indigo-600/30 blur-[90px] sm:blur-[120px] rounded-full animate-pulse delay-1000"></div>
+        {/* سحابی‌های نوری */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] bg-brand/20 dark:bg-brand/30 blur-[120px] rounded-full animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-indigo-500/20 dark:bg-indigo-600/20 blur-[100px] rounded-full animate-pulse delay-700"></div>
         
-        {/* ستاره‌های ریز */}
+        {/* ستاره‌ها */}
         {[...Array(20)].map((_, i) => (
           <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-slate-800 dark:bg-white rounded-full opacity-0 dark:opacity-60"
+            key={`star-${i}`}
+            className="absolute w-1 h-1 bg-slate-800 dark:bg-white rounded-full opacity-0 dark:opacity-50"
             style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
             animate={{ opacity: [0, 0.8, 0], scale: [0, 1.5, 0] }}
             transition={{ duration: Math.random() * 3 + 2, repeat: Infinity, delay: Math.random() * 2 }}
           />
         ))}
+
+        {/* آیکون‌های شناور دسته‌بندی (فقط دسکتاپ) */}
+        <div className="hidden lg:block absolute inset-0">
+          {FLOATERS.map((f, i) => {
+            const Icon = f.icon
+            return (
+              <motion.div
+                key={i}
+                className={`absolute ${f.pos} flex flex-col items-center gap-2 opacity-40 hover:opacity-100 transition-opacity`}
+                animate={{ y: [0, -15, 0] }}
+                transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut", delay: f.delay }}
+              >
+                <div className={`p-4 rounded-2xl bg-gradient-to-br ${f.color} text-white shadow-2xl backdrop-blur-md`}>
+                  <Icon size={28} />
+                </div>
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{f.label}</span>
+              </motion.div>
+            )
+          })}
+        </div>
       </div>
 
-      {/* ===== کارت شناور با شیشه کاملاً شفاف ===== */}
+      {/* ===== کارت اصلی ===== */}
       <motion.div
         animate={{ y: [0, -8, 0] }} 
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
@@ -94,8 +147,8 @@ export default function Login() {
       >
         <div 
           id="floating-card"
-          // 👈 استایل شیشه واقعی (Pure Glass) بدون پس‌زمینه مشکی و با بلور بالا
-          className="rounded-2xl sm:rounded-[2.5rem] border border-slate-300/50 dark:border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] p-6 sm:p-8 flex flex-col justify-center bg-white/30 dark:bg-white/5 backdrop-blur-2xl relative overflow-hidden min-h-[410px] sm:min-h-[380px]"
+          // 👈 باکس شیشه‌ای کاملاً شفاف (bg-transparent) با بلور فوق‌العاده قوی
+          className="rounded-3xl border border-slate-300/30 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-6 sm:p-8 flex flex-col justify-center bg-white/40 dark:bg-transparent backdrop-blur-3xl relative overflow-hidden min-h-[420px]"
         >
           {/* نوار نور بالای کارت */}
           <div className={`absolute top-0 left-10 right-10 h-[2px] transition-colors duration-500 ${
@@ -115,12 +168,12 @@ export default function Login() {
                 transition={{ duration: 0.3, ease: "easeOut" }}
                 className="w-full"
               >
-                <div className="text-center mb-6 sm:mb-8">
-                  <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-brand to-indigo-600 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 shadow-[0_0_20px_rgba(139,92,246,0.4)]">
-                    <User className="text-white" size={24} />
+                <div className="text-center mb-6">
+                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-brand to-indigo-600 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(139,92,246,0.5)]">
+                    <User className="text-white" size={28} />
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-white">ورود به سیستم</h2>
-                  <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-2 flex items-center justify-center gap-1 font-medium">
+                  <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white">ورود به سیستم</h2>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 flex items-center justify-center gap-1 font-medium">
                     <Terminal size={12} /> مرحله ۱: شناسایی کاربر
                   </p>
                 </div>
@@ -139,8 +192,7 @@ export default function Login() {
                       value={username}
                       onChange={e => setUsername(e.target.value)}
                       placeholder="نام کاربری"
-                      // 👈 پس‌زمینه نیمه‌شفاف تیره برای اینپوت تا متن کاملاً خوانا باشه
-                      className="w-full bg-white/50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-xl py-3 sm:py-3.5 pr-12 pl-4 text-base sm:text-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand/50 text-slate-800 dark:text-white transition-all relative z-0 dir-ltr text-left placeholder:text-slate-400"
+                      className="w-full bg-white/60 dark:bg-black/40 border border-slate-300/50 dark:border-white/10 rounded-xl py-3.5 pr-12 pl-4 text-base sm:text-sm outline-none focus:border-brand focus:ring-1 focus:ring-brand/50 text-slate-800 dark:text-white transition-all relative z-0 dir-ltr text-left placeholder:text-slate-400"
                       required
                       autoFocus
                     />
@@ -149,13 +201,22 @@ export default function Login() {
                   <button 
                     type="submit" 
                     disabled={!username}
-                    className="relative w-full py-3 sm:py-3.5 rounded-xl bg-brand-dark text-white font-bold text-sm sm:text-base overflow-hidden group shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="relative w-full py-3.5 rounded-xl bg-brand-dark text-white font-bold text-sm overflow-hidden group shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-all hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span className="relative flex items-center justify-center gap-2">
                       ادامه <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
                     </span>
                   </button>
                 </form>
+                
+                {/* ویژگی‌های فروشگاه (زیر فرم) */}
+                <div className="mt-8 pt-5 border-t border-slate-300/50 dark:border-white/10 space-y-2">
+                  {BULLETS.map((b, i) => (
+                    <div key={i} className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-slate-400">
+                      <b.icon size={14} className="text-brand" /> {b.text}
+                    </div>
+                  ))}
+                </div>
               </motion.div>
             )}
 
@@ -169,20 +230,20 @@ export default function Login() {
                 transition={{ duration: 0.3, ease: "easeOut" }}
                 className="w-full"
               >
-                <div className="text-center mb-6 sm:mb-8">
-                  <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 shadow-[0_0_20px_rgba(16,185,129,0.4)]">
-                    <Lock className="text-white" size={24} />
+                <div className="text-center mb-6">
+                  <div className="mx-auto w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mb-4 shadow-[0_0_25px_rgba(16,185,129,0.5)]">
+                    <Lock className="text-white" size={28} />
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-slate-800 dark:text-white">رمز عبور</h2>
-                  <p className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-300 mt-2 flex items-center justify-center gap-1 font-medium">
+                  <h2 className="text-2xl font-extrabold text-slate-800 dark:text-white">رمز عبور</h2>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 flex items-center justify-center gap-1 font-medium">
                     <ShieldCheck size={12} className="text-emerald-500" /> مرحله ۲: احراز هویت
                   </p>
-                  <div className="mt-3 inline-block bg-slate-200/50 dark:bg-black/30 border border-slate-300 dark:border-white/10 px-3 py-1 rounded-full text-xs font-mono text-slate-700 dark:text-slate-300 dir-ltr">
+                  <div className="mt-3 inline-block bg-white/60 dark:bg-black/40 border border-slate-300/50 dark:border-white/10 px-3 py-1 rounded-full text-xs font-mono text-slate-700 dark:text-slate-300 dir-ltr">
                     {username}
                   </div>
                 </div>
 
-                <form onSubmit={handleLogin} className="space-y-5">
+                <form onSubmit={handleLogin} className="space-y-4">
                   {error && (
                     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-red-500/10 border-l-4 border-red-500 text-red-600 dark:text-red-400 text-xs p-3 rounded-r-lg flex items-center gap-2">
                       <ShieldAlert size={16} className="shrink-0" /> {error}
@@ -196,7 +257,7 @@ export default function Login() {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full bg-white/50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-xl py-3 sm:py-3.5 pr-12 pl-12 text-base sm:text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-slate-800 dark:text-white transition-all relative z-0 dir-ltr text-left placeholder:text-slate-400"
+                      className="w-full bg-white/60 dark:bg-black/40 border border-slate-300/50 dark:border-white/10 rounded-xl py-3.5 pr-12 pl-12 text-base sm:text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50 text-slate-800 dark:text-white transition-all relative z-0 dir-ltr text-left placeholder:text-slate-400"
                       required
                       autoFocus
                     />
@@ -210,11 +271,22 @@ export default function Login() {
                     </button>
                   </div>
 
-                  <div className="flex flex-col gap-3">
+                  {/* چک‌باکس مرا به خاطر بسپار */}
+                  <label className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 cursor-pointer w-fit">
+                    <input 
+                      type="checkbox" 
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 accent-emerald-500" 
+                    />
+                    مرا به خاطر بسپار
+                  </label>
+
+                  <div className="flex flex-col gap-3 pt-2">
                     <button 
                       type="submit" 
                       disabled={loading || !password}
-                      className="relative w-full py-3 sm:py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm sm:text-base overflow-hidden group shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="relative w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm overflow-hidden group shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <span className="relative flex items-center justify-center gap-2">
                         {loading ? (
@@ -228,7 +300,7 @@ export default function Login() {
                     <button 
                       type="button" 
                       onClick={() => { setStep(1); setError(''); setPassword('') }}
-                      className="text-[11px] sm:text-xs text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1 transition-colors py-1"
+                      className="text-[11px] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1 transition-colors py-1"
                     >
                       <ArrowRight size={14} /> تغییر نام کاربری
                     </button>
