@@ -1,37 +1,25 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react'
-import { MAX_QTY, getProduct } from '../data/products.js'
 
 const CartContext = createContext(null)
-const STORAGE_KEY = 'smartshop_cart_v1'
+const STORAGE_KEY = 'smartshop_cart_v2' // نسخه رو تغییر دادیم که کش قبلی پاک بشه
+
+const MAX_QTY = 10
 
 const clampQty = (n) => Math.min(MAX_QTY, Math.max(1, Math.floor(Number(n)) || 1))
-
-// داده‌ی localStorage قابل دستکاری است؛ نام و قیمت همیشه از کاتالوگ خوانده می‌شود.
-function sanitize(raw) {
-  if (!Array.isArray(raw)) return []
-  const seen = new Set()
-  const result = []
-  for (const entry of raw) {
-    const product = getProduct(entry?.id)
-    const qty = Math.floor(Number(entry?.qty))
-    if (!product || seen.has(product.id) || !Number.isFinite(qty) || qty < 1) continue
-    seen.add(product.id)
-    result.push({ id: product.id, name: product.name, price: product.price, qty: clampQty(qty) })
-  }
-  return result
-}
 
 function reducer(state, action) {
   switch (action.type) {
     case 'ADD': {
-      const product = getProduct(action.item?.id)
-      if (!product) return state
+      const product = action.item
+      if (!product || !product.id) return state
       const qty = clampQty(action.qty)
       const exists = state.find((i) => i.id === product.id)
+      
       if (exists) {
         return state.map((i) => (i.id === product.id ? { ...i, qty: Math.min(MAX_QTY, i.qty + qty) } : i))
       }
-      return [...state, { id: product.id, name: product.name, price: product.price, qty }]
+      // ذخیره اطلاعات محصول همراه با عکس
+      return [...state, { id: product.id, name: product.name, price: product.price, image: product.image, qty }]
     }
     case 'DECREASE':
       return state
@@ -42,7 +30,7 @@ function reducer(state, action) {
     case 'CLEAR':
       return []
     case 'SET':
-      return sanitize(action.items)
+      return action.items // دیگه نیازی به sanitize کردن پیچیده نیست
     default:
       return state
   }
@@ -51,7 +39,7 @@ function reducer(state, action) {
 function read() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? sanitize(JSON.parse(raw)) : []
+    return raw ? JSON.parse(raw) : []
   } catch {
     return []
   }
@@ -63,24 +51,8 @@ export function CartProvider({ children }) {
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-    } catch {
-      /* حافظه در دسترس نیست */
-    }
+    } catch {}
   }, [items])
-
-  // همگام‌سازی سبد بین تب‌ها
-  useEffect(() => {
-    const onStorage = (e) => {
-      if (e.key !== STORAGE_KEY) return
-      try {
-        dispatch({ type: 'SET', items: e.newValue ? JSON.parse(e.newValue) : [] })
-      } catch {
-        /* نادیده بگیر */
-      }
-    }
-    window.addEventListener('storage', onStorage)
-    return () => window.removeEventListener('storage', onStorage)
-  }, [])
 
   const value = useMemo(
     () => ({
